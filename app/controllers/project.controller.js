@@ -2,6 +2,7 @@ const db = require("../models");
 const Project = db.project
 const Officer = db.officer
 const Area = db.area
+const Access = db.access
 // Create a new project
 exports.createProject = async (req, res) => {
     try {
@@ -46,7 +47,25 @@ exports.getAllProjectDetail = async (req, res) => {
 // Get a project by ID
 exports.getProjectById = async (req, res) => {
     try {
-        const project = await Project.findByPk(req.params.id);
+        const project = await Project.findByPk(req.params.id,{
+            include: [
+                {
+                    model: Officer,
+                    attributes: ["firstName","lastName","phone"],
+                    include: [
+                        {
+                            model: Access,
+                            as: 'access',
+                            attributes: ["access_name"]
+                        }
+                    ]
+                },
+                {
+                    model: Area,
+                    attributes: ["area","province","region"]
+                }
+            ]
+        });
         if (!project) {
             return res.status(404).json({ message: "Project not found" });
         }
